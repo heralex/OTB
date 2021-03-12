@@ -205,6 +205,8 @@ PipelineMemoryPrintCalculator::MemoryPrintType PipelineMemoryPrintCalculator::Ev
   OTB_IMAGE_SIZE_BLOCK(int)
   OTB_IMAGE_SIZE_BLOCK(unsigned long)
   OTB_IMAGE_SIZE_BLOCK(long)
+  OTB_IMAGE_SIZE_BLOCK(unsigned long long)
+  OTB_IMAGE_SIZE_BLOCK(long long)
   OTB_IMAGE_SIZE_BLOCK(float)
   OTB_IMAGE_SIZE_BLOCK(double)
   OTB_IMAGE_SIZE_BLOCK(std::complex<float>)

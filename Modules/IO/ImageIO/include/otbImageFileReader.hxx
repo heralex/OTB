@@ -830,6 +830,8 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::DoConvertBuffer(void* in
   OTB_CONVERT_BUFFER_IF_BLOCK(int)
   OTB_CONVERT_BUFFER_IF_BLOCK(unsigned long)
   OTB_CONVERT_BUFFER_IF_BLOCK(long)
+  OTB_CONVERT_BUFFER_IF_BLOCK(unsigned long long)
+  OTB_CONVERT_BUFFER_IF_BLOCK(long long)
   OTB_CONVERT_BUFFER_IF_BLOCK(float)
   OTB_CONVERT_BUFFER_IF_BLOCK(double)
   OTB_CONVERT_CBUFFER_IF_BLOCK(std::complex<short>)
@@ -851,6 +853,8 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::DoConvertBuffer(void* in
         << "    " << typeid(int).name() << std::endl
         << "    " << typeid(unsigned long).name() << std::endl
         << "    " << typeid(long).name() << std::endl
+        << "    " << typeid(unsigned long long).name() << std::endl
+        << "    " << typeid(long long).name() << std::endl
         << "    " << typeid(float).name() << std::endl
         << "    " << typeid(double).name() << std::endl;
     e.SetDescription(msg.str());

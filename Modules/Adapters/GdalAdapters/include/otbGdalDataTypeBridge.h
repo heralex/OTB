@@ -75,6 +75,22 @@ GDALDataType GetGDALDataType()
     }
     return GDT_UInt32;
   }
+  else if (typeid(Type) == typeid(long long))
+  {
+    if (sizeof(long long) == 8)
+    {
+      // itkWarningMacro(<< "Cast a long (64 bit) image to an int (32 bit) one.")
+    }
+    return GDT_Int32;
+  }
+  else if (typeid(Type) == typeid(unsigned long long))
+  {
+    if (sizeof(unsigned long long) == 8)
+    {
+      // itkWarningMacro(<< "Cast an unsigned long (64 bit) image to an unsigned int (32 bit) one.")
+    }
+    return GDT_UInt32;
+  }
   else if (typeid(Type) == typeid(float))
   {
     return GDT_Float32;

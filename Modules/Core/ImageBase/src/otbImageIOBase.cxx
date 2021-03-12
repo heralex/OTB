@@ -178,6 +178,10 @@ const std::type_info& ImageIOBase::GetComponentTypeInfo() const
     return typeid(unsigned long);
   case LONG:
     return typeid(long);
+  case ULONGLONG:
+    return typeid(unsigned long long);
+  case LONGLONG:
+    return typeid(long long);
   case FLOAT:
     return typeid(float);
   case DOUBLE:
@@ -444,6 +448,7 @@ bool ImageIOBase::SetPixelTypeInfo(const std::type_info& ptype)
       !itkSetPixelType(this, ptype, ImageIOBase::SHORT, (short)(0)) && !itkSetPixelType(this, ptype, ImageIOBase::USHORT, (unsigned short)(0)) &&
       !itkSetPixelType(this, ptype, ImageIOBase::INT, (int)(0)) && !itkSetPixelType(this, ptype, ImageIOBase::UINT, (unsigned int)(0)) &&
       !itkSetPixelType(this, ptype, ImageIOBase::LONG, (long)(0)) && !itkSetPixelType(this, ptype, ImageIOBase::ULONG, (unsigned long)(0)) &&
+      !itkSetPixelType(this, ptype, ImageIOBase::LONGLONG, (long long)(0)) && !itkSetPixelType(this, ptype, ImageIOBase::ULONGLONG, (unsigned long long)(0)) &&
       !itkSetPixelType(this, ptype, ImageIOBase::FLOAT, (float)(0)) && !itkSetPixelType(this, ptype, ImageIOBase::DOUBLE, (double)(0)) &&
       !itkSetPixelType(this, ptype, ImageIOBase::CSHORT, (std::complex<short>)(0)) &&
       !itkSetPixelType(this, ptype, ImageIOBase::CINT, (std::complex<int>)(0)) &&
@@ -629,6 +634,10 @@ unsigned int ImageIOBase::GetComponentSize() const
     return sizeof(unsigned long);
   case LONG:
     return sizeof(long);
+  case ULONGLONG:
+    return sizeof(unsigned long long);
+  case LONGLONG:
+    return sizeof(long long);
   case FLOAT:
     return sizeof(float);
   case DOUBLE:
@@ -700,6 +709,10 @@ std::string ImageIOBase::GetComponentTypeAsString(IOComponentType t)
     return (s = "unsigned_long");
   case LONG:
     return (s = "long");
+  case ULONGLONG:
+    return (s = "unsigned_long_long");
+  case LONGLONG:
+    return (s = "long_long");
   case FLOAT:
     return (s = "float");
   case DOUBLE:
@@ -831,6 +844,21 @@ void ImageIOBase::WriteBufferAsASCII(std::ostream& os, const void* buffer, IOCom
   }
   break;
 
+  case ULONGLONG:
+  {
+    typedef const unsigned long long* Type;
+    Type                         buf = reinterpret_cast<Type>(buffer);
+    WriteBuffer(os, buf, numComp);
+  }
+  break;
+
+  case LONGLONG:
+  {
+    typedef const long long* Type;
+    Type                buf = reinterpret_cast<Type>(buffer);
+    WriteBuffer(os, buf, numComp);
+  }
+  break;
   case FLOAT:
   {
     typedef const float* Type;
@@ -954,6 +982,20 @@ void ImageIOBase::ReadBufferAsASCII(std::istream& is, void* buffer, IOComponentT
   case LONG:
   {
     long* buf = reinterpret_cast<long*>(buffer);
+    ReadBuffer(is, buf, numComp);
+  }
+  break;
+
+  case ULONGLONG:
+  {
+    unsigned long long* buf = reinterpret_cast<unsigned long long*>(buffer);
+    ReadBuffer(is, buf, numComp);
+  }
+  break;
+
+  case LONGLONG:
+  {
+    long long* buf = reinterpret_cast<long long*>(buffer);
     ReadBuffer(is, buf, numComp);
   }
   break;

@@ -212,6 +212,8 @@ void BSQImageIO::Read(void* buffer)
           otbSwappFileToSystemMacro(unsigned int, UINT, buffer, numberOfPixelsOfRegion) otbSwappFileToSystemMacro(int, INT, buffer, numberOfPixelsOfRegion)
               otbSwappFileToSystemMacro(long, LONG, buffer, numberOfPixelsOfRegion)
                   otbSwappFileToSystemMacro(unsigned long, ULONG, buffer, numberOfPixelsOfRegion)
+					otbSwappFileToSystemMacro(long long, LONGLONG, buffer, numberOfPixelsOfRegion)
+						otbSwappFileToSystemMacro(unsigned long long, ULONGLONG, buffer, numberOfPixelsOfRegion)
                       otbSwappFileToSystemMacro(float, FLOAT, buffer, numberOfPixelsOfRegion)
                           otbSwappFileToSystemMacro(double, DOUBLE, buffer, numberOfPixelsOfRegion) else
   {

@@ -175,6 +175,8 @@ void LUMImageIO::Read(void* buffer)
           otbSwappFileToSystemMacro(unsigned int, UINT, buffer, numberOfPixelsPerLines) otbSwappFileToSystemMacro(int, INT, buffer, numberOfPixelsPerLines)
               otbSwappFileToSystemMacro(long, LONG, buffer, numberOfPixelsPerLines)
                   otbSwappFileToSystemMacro(unsigned long, ULONG, buffer, numberOfPixelsPerLines)
+              otbSwappFileToSystemMacro(long long, LONGLONG, buffer, numberOfPixelsPerLines)
+                  otbSwappFileToSystemMacro(unsigned long long, ULONGLONG, buffer, numberOfPixelsPerLines)
                       otbSwappFileToSystemMacro(float, FLOAT, buffer, numberOfPixelsPerLines)
                           otbSwappFileToSystemMacro(double, DOUBLE, buffer, numberOfPixelsPerLines) else
   {
