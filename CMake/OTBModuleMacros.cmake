@@ -218,6 +218,7 @@ macro(otb_module_impl)
     # Generate the export macro header for symbol visibility/Windows DLL declspec
     # This header is called *Modulename*Export.h in the build directory,
     # and contains defines for _EXPORT macros such as OTBApplicationEngine_EXPORT
+    include(${OTB_SOURCE_DIR}/CMake/GenerateExportHeaderCustom.cmake)
     generate_export_header(${otb-module}
       EXPORT_FILE_NAME ${_export_header_file}
       EXPORT_MACRO_NAME ${otb-module}_EXPORT
