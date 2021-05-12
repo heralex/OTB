@@ -255,7 +255,7 @@ private:
     {
 
       // Clear and reset the DEM Handler
-      otb::DEMHandler::Instance()->ClearDEMs();
+      otb::DEMHandler::GetInstance().ClearDEMs();
       otb::Wrapper::ElevationParametersHandler::SetupDEMHandlerFromElevationParameters(this, "elev");
 
       // input image
@@ -565,7 +565,7 @@ private:
 
     // Set the output projection Ref
     m_ResampleFilter->SetInputProjectionRef(inImage->GetProjectionRef());
-    m_ResampleFilter->SetInputKeywordList(inImage->GetImageKeywordlist());
+    m_ResampleFilter->SetInputImageMetadata(&(inImage->GetImageMetadata()));
     m_ResampleFilter->SetOutputProjectionRef(m_OutputProjectionRef);
 
     // Check size

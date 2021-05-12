@@ -72,7 +72,7 @@ int otbDEMToImageGeneratorFromImageTest(int argc, char* argv[])
   WriterType::Pointer writer1 = WriterType::New();
   WriterType::Pointer writer2 = WriterType::New();
 
-  otb::DEMHandler::Instance()->OpenDEMDirectory(folderPath);
+  otb::DEMHandler::GetInstance().OpenDEMDirectory(folderPath);
 
   // Read input image
   reader->SetFileName(inputName);
@@ -111,7 +111,6 @@ int otbDEMToImageGeneratorFromImageTest(int argc, char* argv[])
   {
     char* outputName2 = argv[4];
     generatorFilter2->SetOutputParametersFromImage(reader->GetOutput());
-    generatorFilter2->InstantiateTransform();
 
     extract2->SetInput(generatorFilter2->GetOutput());
     extract2->SetSizeX(atoi(argv[7]));

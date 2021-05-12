@@ -31,6 +31,9 @@ otbGDALReadPxlComplex.cxx
 otbGDALImageIOTestCanRead.cxx
 otbMultiDatasetReadingInfo.cxx
 otbOGRVectorDataIOCanRead.cxx
+otbGDALImageIOImportExportMetadata.cxx
+otbGDALRPCTransformerTest.cxx
+otbGDALRPCTransformerTest2.cxx
 )
 
 add_executable(otbIOGDALTestDriver ${OTBIOGDALTests})
@@ -128,6 +131,16 @@ otb_add_test(NAME ioTvGDALImageIOWriteMetadata COMMAND otbIOGDALTestDriver
   ${TEMP}/ioTvGDALImageIOWriteMetadata.hdr
   ${TEMP}/ioTvGDALImageIOWriteMetadata_Report.txt
   )
+  
+# TODO implement this test
+# otb_add_test(NAME ioTvGDALImageIOImportExportMetadata_JPEG_99 COMMAND otbIOGDALTestDriver
+#  --compare-ascii ${NOTOL} ${BASELINE_FILES}/ioTvGDALImageIOImportExportMetadata_JPEG_99.txt
+#  ${TEMP}/ioTvGDALImageIOImportExportMetadata_JPEG_99.txt
+#  otbGDALImageIOImportExportMetadata
+#  ${INPUTDATA}/maur_rgb_24bpp.tif
+#  ${TEMP}/ioTvGDALImageIOImportExportMetadata_JPEG_99.tif
+#  ${TEMP}/ioTvGDALImageIOImportExportMetadata_JPEG_99.txt
+#  )
 
 otb_add_test(NAME ioTvGDALOverviewsBuilder_TIFF COMMAND otbIOGDALTestDriver
   otbGDALOverviewsBuilder
@@ -249,3 +262,73 @@ foreach(INPUTFILE_PIXELTYPE ${INPUTFILE_PIXELTYPES_LIST})
     1 5 10 2) #old file hdr sans extensions
 
 endforeach()
+
+otb_add_test(NAME TuGDALRPCTransformerTest
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest
+  ${INPUTDATA}/TuGDALRPCTransformerTest_DEM.tif
+  )
+
+otb_add_test(NAME ioTvGDALRPCTransformerTest_ikonos_geom
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest2
+  ${INPUTDATA}/ikonos/ikonos-1.geom # Geom
+  ${INPUTDATA}/ikonos/ikonos-1.gcp2 # GCP
+  0.04 # GeoTol
+  0.1 # ImgTol
+  )
+
+otb_add_test(NAME ioTvGDALRPCTransformerTest_ikonos_product
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest2
+  LARGEINPUT{IKONOS/BLOSSEVILLE/po_2619900_blu_0000000.tif} # Product
+  ${INPUTDATA}/ikonos/ikonos-1.gcp2 # GCP
+  0.04 # GeoTol
+  0.1 # ImgTol
+  )
+
+otb_add_test(NAME ioTvGDALRPCTransformerTest_quickbird
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest2
+  ${INPUTDATA}/QB/qb-1.geom # Geom
+  ${INPUTDATA}/QB/qb-1.gcp2 # GCP
+  0.024 # GeoTol
+  0.1 # ImgTol
+  )
+
+otb_add_test(NAME ioTvGDALRPCTransformerTest_spot6
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest2
+  ${INPUTDATA}/spot6/spot6-1.geom # Geom
+  ${INPUTDATA}/spot6/spot6-1.gcp2 # GCP
+  0.06 # GeoTol
+  0.1 # ImgTol
+  )
+
+otb_add_test(NAME ioTvGDALRPCTransformerTest_worldview2
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest2
+  ${INPUTDATA}/wv2/wv2-1.geom # Geom
+  ${INPUTDATA}/wv2/wv2-1.gcp2 # GCP
+  0.0185 # GeoTol
+  0.1 # ImgTol
+  )
+
+otb_add_test(NAME ioTvGDALRPCTransformerTest_pl_hnord_geom
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest2
+  ${INPUTDATA}/pleiades/pleiades-1.geom # Geom
+  ${INPUTDATA}/pleiades/pleiades-1.gcp2 # GCP
+  0.02 # GeoTol
+  0.1 # ImgTol
+  )
+
+otb_add_test(NAME ioTvGDALRPCTransformerTest_pl_hnord_product
+  COMMAND otbIOGDALTestDriver
+  otbGDALRPCTransformerTest2
+  LARGEINPUT{PLEIADES/TLSE_JP2_DIMAPv2_PRIMARY_PMS_lossless_12bits/IMGPHR_201222215194743808/IMG_PHR1A_PMS_201201151100183_SEN_IPU_20120222_0901-001_R1C1.JP2} # Product
+  ${INPUTDATA}/pleiades/pleiades-1.gcp2 # GCP
+  0.02 # GeoTol
+  0.1 # ImgTol
+  )
+

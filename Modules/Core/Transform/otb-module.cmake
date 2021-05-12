@@ -33,12 +33,14 @@ otb_module(OTBTransform
     OTBOSSIMAdapters
     OTBMetadata
     OTBGdalAdapters
+    OTBIOGDAL
   TEST_DEPENDS
     OTBImageBase
     OTBImageIO
     OTBImageManipulation
     OTBOssim
     OTBTestKernel
+    OTBProjection
 
   DESCRIPTION
     "${DOCUMENTATION}"

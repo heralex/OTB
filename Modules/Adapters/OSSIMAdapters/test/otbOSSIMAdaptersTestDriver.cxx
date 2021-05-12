@@ -27,6 +27,4 @@ void RegisterTests()
   REGISTER_TEST(otbOssimElevManagerTest2);
   REGISTER_TEST(otbOssimElevManagerTest4);
   REGISTER_TEST(otbDEMHandlerTest);
-  REGISTER_TEST(otbRPCSolverAdapterTest);
-  REGISTER_TEST(otbSarSensorModelAdapterTest);
 }

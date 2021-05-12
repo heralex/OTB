@@ -22,6 +22,7 @@
 #include "otbImageMetadataInterfaceBase.h"
 
 #include "otbNoDataHelper.h"
+#include "otbGeometryMetadata.h"
 #include "itkMetaDataObject.h"
 #include "itksys/SystemTools.hxx"
 
@@ -32,6 +33,38 @@ namespace otb
 ImageMetadataInterfaceBase::ImageMetadataInterfaceBase()
 {
 }
+
+
+void ImageMetadataInterfaceBase::SetImage(ImageType* image)
+{
+  this->SetMetaDataDictionary(image->GetMetaDataDictionary());
+}
+
+
+void ImageMetadataInterfaceBase::SetMetaDataDictionary(const MetaDataDictionaryType& dict)
+{
+  m_MetaDataDictionary = dict;
+}
+
+
+const ImageMetadataInterfaceBase::MetaDataDictionaryType&
+ImageMetadataInterfaceBase::GetMetaDataDictionary() const
+{
+  return m_MetaDataDictionary;
+}
+
+
+void ImageMetadataInterfaceBase::SetImageMetadata(ImageMetadata imd)
+{
+  m_Imd = std::move(imd);
+}
+
+
+const ImageMetadata& ImageMetadataInterfaceBase::GetImageMetadata() const
+{
+  return m_Imd;
+}
+
 
 std::string ImageMetadataInterfaceBase::GetProjectionRef() const
 {
@@ -74,7 +107,7 @@ unsigned int ImageMetadataInterfaceBase::GetGCPCount() const
   return (GCPCount);
 }
 
-OTB_GCP& ImageMetadataInterfaceBase::GetGCPs(unsigned int GCPnum)
+GCP& ImageMetadataInterfaceBase::GetGCPs(unsigned int GCPnum)
 {
   std::string                   key;
   const MetaDataDictionaryType& dict = this->GetMetaDataDictionary();
@@ -86,7 +119,7 @@ OTB_GCP& ImageMetadataInterfaceBase::GetGCPs(unsigned int GCPnum)
   if (dict.HasKey(key))
   {
 
-    itk::ExposeMetaData<OTB_GCP>(dict, key, m_GCP);
+    itk::ExposeMetaData<GCP>(dict, key, m_GCP);
   }
   return (m_GCP);
 }
@@ -102,8 +135,8 @@ std::string ImageMetadataInterfaceBase::GetGCPId(unsigned int GCPnum) const
 
   if (dict.HasKey(key))
   {
-    OTB_GCP gcp;
-    itk::ExposeMetaData<OTB_GCP>(dict, key, gcp);
+    GCP gcp;
+    itk::ExposeMetaData<GCP>(dict, key, gcp);
     return (gcp.m_Id);
   }
   else
@@ -121,8 +154,8 @@ std::string ImageMetadataInterfaceBase::GetGCPInfo(unsigned int GCPnum) const
 
   if (dict.HasKey(key))
   {
-    OTB_GCP gcp;
-    itk::ExposeMetaData<OTB_GCP>(dict, key, gcp);
+    GCP gcp;
+    itk::ExposeMetaData<GCP>(dict, key, gcp);
     return (gcp.m_Info);
   }
   else
@@ -140,8 +173,8 @@ double ImageMetadataInterfaceBase::GetGCPRow(unsigned int GCPnum) const
 
   if (dict.HasKey(key))
   {
-    OTB_GCP gcp;
-    itk::ExposeMetaData<OTB_GCP>(dict, key, gcp);
+    GCP gcp;
+    itk::ExposeMetaData<GCP>(dict, key, gcp);
     return (gcp.m_GCPRow);
   }
   else
@@ -159,8 +192,8 @@ double ImageMetadataInterfaceBase::GetGCPCol(unsigned int GCPnum) const
 
   if (dict.HasKey(key))
   {
-    OTB_GCP gcp;
-    itk::ExposeMetaData<OTB_GCP>(dict, key, gcp);
+    GCP gcp;
+    itk::ExposeMetaData<GCP>(dict, key, gcp);
     return (gcp.m_GCPCol);
   }
   else
@@ -178,8 +211,8 @@ double ImageMetadataInterfaceBase::GetGCPX(unsigned int GCPnum) const
 
   if (dict.HasKey(key))
   {
-    OTB_GCP gcp;
-    itk::ExposeMetaData<OTB_GCP>(dict, key, gcp);
+    GCP gcp;
+    itk::ExposeMetaData<GCP>(dict, key, gcp);
     return (gcp.m_GCPX);
   }
   else
@@ -197,8 +230,8 @@ double ImageMetadataInterfaceBase::GetGCPY(unsigned int GCPnum) const
 
   if (dict.HasKey(key))
   {
-    OTB_GCP gcp;
-    itk::ExposeMetaData<OTB_GCP>(dict, key, gcp);
+    GCP gcp;
+    itk::ExposeMetaData<GCP>(dict, key, gcp);
     return (gcp.m_GCPY);
   }
   else
@@ -216,8 +249,8 @@ double ImageMetadataInterfaceBase::GetGCPZ(unsigned int GCPnum) const
 
   if (dict.HasKey(key))
   {
-    OTB_GCP gcp;
-    itk::ExposeMetaData<OTB_GCP>(dict, key, gcp);
+    GCP gcp;
+    itk::ExposeMetaData<GCP>(dict, key, gcp);
     return (gcp.m_GCPZ);
   }
   else
@@ -498,10 +531,10 @@ void ImageMetadataInterfaceBase::PrintMetadata(std::ostream& os, itk::Indent ind
       break;
     }
 
-    case MetaDataKey::TOTB_GCP:
+    case MetaDataKey::TGCP:
     {
-      OTB_GCP gcpvalue;
-      itk::ExposeMetaData<OTB_GCP>(dict2, keys[itkey], gcpvalue);
+      GCP gcpvalue;
+      itk::ExposeMetaData<GCP>(dict2, keys[itkey], gcpvalue);
 
       os << indent << "---> " << keys[itkey] << std::endl;
       gcpvalue.Print(os);
@@ -587,5 +620,145 @@ void ImageMetadataInterfaceBase::PrintSelf(std::ostream& os, itk::Indent indent)
   }
 }
 
+const std::string&
+ImageMetadataInterfaceBase::Fetch(
+  MDStr key,
+  const MetadataSupplierInterface & mds,
+  const char *path,
+  int band)
+{
+  if (band >= 0)
+    {
+    assert( (size_t)(band) < m_Imd.Bands.size());
+    m_Imd.Bands[band].Add(key, mds.GetAs<std::string>(path, band));
+    return m_Imd.Bands[band][key];
+    }
+  m_Imd.Add(key, mds.GetAs<std::string>(path) );
+  return m_Imd[key];
+}
+
+const double&
+ImageMetadataInterfaceBase::Fetch(
+  MDNum key,
+  const MetadataSupplierInterface & mds,
+  const char *path,
+  int band)
+{
+  if (band >= 0)
+    {
+    assert( (size_t)(band) < m_Imd.Bands.size());
+    m_Imd.Bands[band].Add(key, mds.GetAs<double>(path, band));
+    return m_Imd.Bands[band][key];
+    }
+  m_Imd.Add(key, mds.GetAs<double>(path));
+  return m_Imd[key];
+}
+
+const MetaData::Time&
+ImageMetadataInterfaceBase::Fetch(
+  MDTime key,
+  const MetadataSupplierInterface & mds,
+  const char *path,
+  int band)
+{
+  if (band >= 0)
+    {
+    assert( (size_t)(band) < m_Imd.Bands.size());
+    m_Imd.Bands[band].Add(key, mds.GetAs<MetaData::Time>(path, band));
+    return m_Imd.Bands[band][key];
+    }
+
+  m_Imd.Add(key, mds.GetAs<MetaData::Time>(path));
+  return m_Imd[key];
+}
+
+const std::string&
+ImageMetadataInterfaceBase::Fetch(
+		std::string key,
+		const MetadataSupplierInterface & mds,
+		const char *path,
+		int band)
+{
+  if (band >= 0)
+    {
+    assert( (size_t)(band) < m_Imd.Bands.size());
+    m_Imd.Bands[band].Add(key, mds.GetAs<std::string>(path, band));
+    return m_Imd.Bands[band][key];
+    }
+  m_Imd.Add(key, mds.GetAs<std::string>(path) );
+  return m_Imd[key];
+}
+
+const boost::any& ImageMetadataInterfaceBase::FetchRPC(const MetadataSupplierInterface & mds,
+						       const double lineOffset, const double sampleOffset)
+{
+  Projection::RPCParam rpcStruct;
+
+  // In some products, RPC metadata read by GDAL have an unit attached, and the
+  // fetched string cannot be converted to double directly, e.g.
+  // LINE_OFF=+002320.00 pixels (from an Ikonos product)
+  // This lambda removes the unit suffix from the metadata.
+  auto GetMetadataWithoutUnit = [](const std::string & path, 
+                                    const MetadataSupplierInterface & mds)
+  {
+    auto metadataAsString = mds.GetAs<std::string>(path);
+
+    for (const auto & name : {"meters", "degrees", "pixels"})
+    {
+      auto i = metadataAsString.find(name);
+      if (i != std::string::npos)
+      {
+        metadataAsString.erase(i, strlen(name));
+        break;
+      }
+    }
+    
+    try
+    {
+      return std::stod(metadataAsString);
+    }
+    catch (const std::invalid_argument&)
+    {
+      otbGenericExceptionMacro(MissingMetadataException,<<"Bad metadata value for '"<<path<<"', got: "<<metadataAsString)
+    }
+  };
+
+  rpcStruct.LineOffset    = GetMetadataWithoutUnit("RPC/LINE_OFF", mds) + lineOffset;
+  rpcStruct.SampleOffset  = GetMetadataWithoutUnit("RPC/SAMP_OFF", mds) + sampleOffset;
+  rpcStruct.LatOffset     = GetMetadataWithoutUnit("RPC/LAT_OFF", mds);
+  rpcStruct.LonOffset     = GetMetadataWithoutUnit("RPC/LONG_OFF", mds);
+  rpcStruct.HeightOffset  = GetMetadataWithoutUnit("RPC/HEIGHT_OFF", mds);
+
+  rpcStruct.LineScale    = GetMetadataWithoutUnit("RPC/LINE_SCALE", mds);
+  rpcStruct.SampleScale  = GetMetadataWithoutUnit("RPC/SAMP_SCALE", mds);
+  rpcStruct.LatScale     = GetMetadataWithoutUnit("RPC/LAT_SCALE", mds);
+  rpcStruct.LonScale     = GetMetadataWithoutUnit("RPC/LONG_SCALE", mds);
+  rpcStruct.HeightScale  = GetMetadataWithoutUnit("RPC/HEIGHT_SCALE", mds);
+
+  std::vector<double> coeffs(20);
+
+  coeffs = mds.GetAsVector<double>("RPC/LINE_NUM_COEFF",' ',20);
+  std::copy(coeffs.begin(), coeffs.end(), rpcStruct.LineNum);
+
+  coeffs = mds.GetAsVector<double>("RPC/LINE_DEN_COEFF",' ',20);
+  std::copy(coeffs.begin(), coeffs.end(), rpcStruct.LineDen);
+
+  coeffs = mds.GetAsVector<double>("RPC/SAMP_NUM_COEFF",' ',20);
+  std::copy(coeffs.begin(), coeffs.end(), rpcStruct.SampleNum);
+
+  coeffs = mds.GetAsVector<double>("RPC/SAMP_DEN_COEFF",' ',20);
+  std::copy(coeffs.begin(), coeffs.end(), rpcStruct.SampleDen);
+
+  m_Imd.Add(MDGeom::RPC, rpcStruct);
+  assert(m_Imd.Has(MDGeom::RPC));
+  assert(rpcStruct == boost::any_cast<Projection::RPCParam>(m_Imd[MDGeom::RPC]));
+  return m_Imd[MDGeom::RPC];
+}
+
+bool ImageMetadataInterfaceBase::ConvertImageKeywordlistToImageMetadata()
+{
+  // by default, no conversion
+  return false;
+}
 
 } // end namespace otb

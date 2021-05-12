@@ -18,4 +18,6 @@
 # limitations under the License.
 
 project(OTBQGIS)
-otb_module_impl()
+if(OTB_WRAP_QGIS)
+	otb_module_impl()
+endif()

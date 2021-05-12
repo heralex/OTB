@@ -22,7 +22,7 @@
 #define otbCosmoImageMetadataInterface_h
 
 #include "otbSarImageMetadataInterface.h"
-
+#include "otbSARMetadata.h"
 
 namespace otb
 {
@@ -89,6 +89,11 @@ public:
   double GetRadarFrequency() const override;
 
   double GetCenterIncidenceAngle() const override;
+
+  void Parse(const MetadataSupplierInterface &) override;
+
+  std::vector<std::map<std::string, std::string> > saveMetadataBands(std::string file) ;
+  std::vector<Orbit> getOrbits(const MetadataSupplierInterface &, const std::string & referenceTime);
 
 protected:
   /* class ctor */

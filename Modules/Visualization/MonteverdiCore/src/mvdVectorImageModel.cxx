@@ -121,7 +121,7 @@ void VectorImageModel::SetFilename(const QString& filename, int w, int h)
 
   // Setup GenericRSTransform
   m_ToWgs84 = otb::GenericRSTransform<>::New();
-  m_ToWgs84->SetInputDictionary(m_ImageFileReader->GetOutput()->GetMetaDataDictionary());
+  m_ToWgs84->SetInputImageMetadata(&(m_ImageFileReader->GetOutput()->GetImageMetadata()));
   m_ToWgs84->SetOutputProjectionRef(otb::SpatialReference::FromWGS84().ToWkt());
   m_ToWgs84->InstantiateTransform();
 
@@ -603,7 +603,7 @@ void VectorImageModel::virtual_ToWgs84(const PointType& physical, PointType& wgs
 
   wgs84 = m_ToWgs84->TransformPoint(physical);
 
-  alt = otb::DEMHandler::Instance()->GetHeightAboveEllipsoid(wgs84[0], wgs84[1]);
+  alt = otb::DEMHandler::GetInstance().GetHeightAboveEllipsoid(wgs84[0], wgs84[1]);
 }
 
 /*****************************************************************************/
@@ -617,10 +617,10 @@ void VectorImageModel::OnModelUpdated()
   ApplySettings();
 
   // Emit settings update to notify display refresh.
-  emit SettingsUpdated(this);
+  Q_EMIT SettingsUpdated(this);
 
   // Emit properties update.
-  emit PropertiesUpdated(this);
+  Q_EMIT PropertiesUpdated(this);
 }
 
 /*****************************************************************************/
@@ -665,7 +665,7 @@ void VectorImageModel::OnPhysicalCursorPositionChanged(const QPoint&, const Poin
 
   bool isInsideNativeLargestRegion = GetNativeLargestRegion().IsInside(currentIndex);
 
-  emit CurrentIndexUpdated(currentIndex, isInsideNativeLargestRegion);
+  Q_EMIT CurrentIndexUpdated(currentIndex, isInsideNativeLargestRegion);
 
   //
   // Display the radiometry of the displayed channels
@@ -735,7 +735,7 @@ void VectorImageModel::OnPhysicalCursorPositionChanged(const QPoint&, const Poin
         geoVector.push_back(ossGeographicLong.str());
         geoVector.push_back(ossGeographicLat.str());
 
-        double elev = otb::DEMHandler::Instance()->GetHeightAboveEllipsoid(wgs84[0], wgs84[1]);
+        double elev = otb::DEMHandler::GetInstance().GetHeightAboveEllipsoid(wgs84[0], wgs84[1]);
 
         if (elev > -32768)
         {
@@ -868,13 +868,13 @@ void VectorImageModel::OnPhysicalCursorPositionChanged(const QPoint&, const Poin
 #endif
 
   // update the status bar
-  emit CurrentPhysicalUpdated(cartoList);
-  emit CurrentGeographicUpdated(geoList);
-  emit CurrentRadioUpdated(ToQString(ossRadio.str().c_str()));
+  Q_EMIT CurrentPhysicalUpdated(cartoList);
+  Q_EMIT CurrentGeographicUpdated(geoList);
+  Q_EMIT CurrentRadioUpdated(ToQString(ossRadio.str().c_str()));
 #if USE_RGB_CHANNELS_LIMIT
-  emit CurrentPixelValueUpdated(pixel, stringList);
+  Q_EMIT CurrentPixelValueUpdated(pixel, stringList);
 #else
-  emit CurrentPixelValueUpdated(pixel, bandNames);
+  Q_EMIT CurrentPixelValueUpdated(pixel, bandNames);
 #endif
 }
 

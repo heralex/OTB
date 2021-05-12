@@ -37,6 +37,10 @@
 #include "otbConvertPixelBuffer.h"
 #include "otbImageIOFactory.h"
 #include "otbMetaDataKey.h"
+#include "otbImageMetadata.h"
+#include "otbImageMetadataInterfaceFactory.h"
+#include "otbImageCommons.h"
+#include "otbGeomMetadataSupplier.h"
 
 #include "otbMacro.h"
 
@@ -385,6 +389,12 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::GenerateOutputInformatio
   output->SetDirection(direction); // Set the image direction cosines
   output->SetSpacing(spacing);     // Set the image spacing
 
+  // detect Image supporting new ImageMetadata
+  ImageCommons* img_common = dynamic_cast<ImageCommons*>(this->GetOutput());
+  
+  // Get ImageMetadata from ImageIO
+  ImageMetadata imd = m_ImageIO->GetImageMetadata();
+
   if (!m_KeywordListUpToDate && !m_FilenameHelper->GetSkipGeom())
   {
 
@@ -441,45 +451,6 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::GenerateOutputInformatio
     {
       itk::EncapsulateMetaData<ImageKeywordlist>(dict, MetaDataKey::OSSIMKeywordlistKey, otb_kwl);
     }
-    /*else
-      {
-      //
-      // For image with world file, we have a non-null GeoTransform, an empty kwl, but no projection ref.
-      // Decision made here : if the keywordlist is empty, and the geotransform is not the identity,
-      // then assume the file is in WGS84
-      //
-      std::string projRef;
-      itk::ExposeMetaData(dict, MetaDataKey::ProjectionRefKey, projRef);
-
-      // Compute spacing for an identity geotransform at current resolution
-      unsigned int resolution = 0;
-      itk::ExposeMetaData<unsigned int>(dict,
-                                        MetaDataKey::ResolutionFactor,
-                                        resolution);
-      double idSpacing = 1.0;
-      if (resolution != 0)
-        idSpacing = 1.0 * std::pow((double)2.0, (double)resolution);
-
-   std::cout << "?" << std::endl;
-   std::cout << std::abs(origin[0] - 0.5 * spacing[0]) << std::endl;
-    std::cout << std::abs(origin[1] - 0.5 * spacing[1]) << std::endl;
-     std::cout << std::abs(spacing[0] - idSpacing) << std::endl;
-      std::cout << std::abs(spacing[1] - idSpacing) << std::endl;
-      const double epsilon = 1.0E-12;
-      if ( projRef.empty()
-           && std::abs(origin[0] - 0.5 * spacing[0]) > epsilon
-           && std::abs(origin[1] - 0.5 * spacing[1]) > epsilon
-           && (std::abs(spacing[0] - idSpacing) > epsilon
-           && std::abs(spacing[1] - idSpacing) > epsilon))
-        {
-            std::cout << "Force the projection ref" << std::endl;
-        std::string wgs84ProjRef =
-                "GEOGCS[\"GCS_WGS_1984\", DATUM[\"D_WGS_1984\", SPHEROID[\"WGS_1984\", 6378137, 298.257223563]],"
-                "PRIMEM[\"Greenwich\", 0], UNIT[\"Degree\", 0.017453292519943295]]";
-
-        itk::EncapsulateMetaData<std::string>(dict, MetaDataKey::ProjectionRefKey, wgs84ProjRef);
-        }
-      }*/
 
     m_KeywordListUpToDate = true;
   }
@@ -490,16 +461,59 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::GenerateOutputInformatio
     itk::ExposeMetaData<ImageKeywordlist>(this->GetOutput()->GetMetaDataDictionary(), MetaDataKey::OSSIMKeywordlistKey, otb_kwl);
     // And add to new one
     itk::EncapsulateMetaData<ImageKeywordlist>(dict, MetaDataKey::OSSIMKeywordlistKey, otb_kwl);
+
+//    if (m_KeywordListUpToDate)
+//      {
+//      // Read back from existing dictionary
+//      if (img_common != nullptr)
+//        {
+//        imd = img_common->GetImageMetadata();
+//        }
+//      }
+//    if (m_FilenameHelper->GetSkipGeom())
+//      {
+//      // Make sure the SensorGeometry is empty
+//      imd.RemoveSensorGeometry();
+//      }
   }
 
+  // NEW METADATA FRAMEWORK
+  std::string DerivatedFileName = GetDerivedDatasetSourceFileName(m_FileName);
+  std::string extension                 = itksys::SystemTools::GetFilenameLastExtension(DerivatedFileName);
+  std::string attachedGeom              = DerivatedFileName.substr(0, DerivatedFileName.size() - extension.size()) + std::string(".geom");
+  // Case 1: external geom supplied through extended filename
+  if (!m_FilenameHelper->GetSkipGeom() && m_FilenameHelper->ExtGEOMFileNameIsSet())
+  {
+    GeomMetadataSupplier geomSupplier(m_FilenameHelper->GetExtGEOMFileName());
+    UpdateImdWithImiAndMds(imd, geomSupplier);
+    geomSupplier.FetchRPC(imd);
+  }
+  // Case 2: attached geom (if present)
+  else if (!m_FilenameHelper->GetSkipGeom() && itksys::SystemTools::FileExists(attachedGeom))
+  {
+    GeomMetadataSupplier geomSupplier(attachedGeom);
+    UpdateImdWithImiAndMds(imd, geomSupplier);
+    geomSupplier.FetchRPC(imd);
+  }
+  // Case 3: tags in file
+  else
+  {
+    auto gdalMetadataSupplierPointer = dynamic_cast<MetadataSupplierInterface*>(m_ImageIO.GetPointer());
+    if (gdalMetadataSupplierPointer)
+    {
+      UpdateImdWithImiAndMds(imd, *gdalMetadataSupplierPointer);
+    }
+  }
 
   // If Skip ProjectionRef is activated, remove ProjRef from dict
   if (m_FilenameHelper->GetSkipCarto())
   {
     itk::EncapsulateMetaData<std::string>(dict, MetaDataKey::ProjectionRefKey, "");
+    imd.RemoveProjectedGeometry();
   }
 
   // Copy MetaDataDictionary from instantiated reader to output image.
+  // TODO: disable when Ossim removed
   if (!m_FilenameHelper->GetSkipGeom())
   {
     output->SetMetaDataDictionary(this->m_ImageIO->GetMetaDataDictionary());
@@ -514,7 +528,7 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::GenerateOutputInformatio
     output->SetMetaDataDictionary(dictLight);
     this->SetMetaDataDictionary(dictLight);
   }
-
+  
   IndexType start;
   start.Fill(0);
 
@@ -533,7 +547,23 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::GenerateOutputInformatio
       // invalid range
       itkGenericExceptionMacro("The given band range is either empty or invalid for a " << m_IOComponents << " bands input image!");
     }
+    // ImageIO returned the metadata from all bands of the input raster. It needs to be adapted to the layout of m_BandList
+    ImageMetadata::ImageMetadataBandsType bandRangeMetadata;
+    for (auto elem: m_BandList)
+    {
+      bandRangeMetadata.push_back(imd.Bands[elem]);
+    }
+    imd.Bands = bandRangeMetadata;
     m_IOComponents = m_BandList.size();
+  }
+
+  // Delete band metadata if the Conversion policy changed the number of bands, in the case of 
+  // grayscale to RGB for example. Because we cannot know how the metadata should be mapped.
+  // TODO: define proper behavior in this case.
+  using ConvertIOPixelTraits = otb::DefaultConvertPixelTraits<typename TOutputImage::IOPixelType>;
+  if (strcmp(output->GetNameOfClass(), "Image") == 0 && !(this->m_ImageIO->GetNumberOfComponents() == ConvertIOPixelTraits::GetNumberOfComponents()))
+  {
+    imd.Bands = ImageMetadata::ImageMetadataBandsType (ConvertIOPixelTraits::GetNumberOfComponents());
   }
 
   // THOMAS : ajout
@@ -545,7 +575,21 @@ void ImageFileReader<TOutputImage, ConvertPixelTraits>::GenerateOutputInformatio
     AccessorFunctorType::SetVectorLength(output, m_IOComponents);
   }
 
+  if (img_common != nullptr)
+    {
+    img_common->SetImageMetadata(imd);
+    }
+
   output->SetLargestPossibleRegion(region);
+}
+
+template <class TOutputImage, class ConvertPixelTraits>
+void ImageFileReader<TOutputImage, ConvertPixelTraits>::UpdateImdWithImiAndMds(ImageMetadata& imd, const MetadataSupplierInterface & mds)
+{
+  ImageMetadataInterfaceBase::Pointer imi = ImageMetadataInterfaceFactory::CreateIMI(imd, mds);
+  // update 'imd' with the parsed metadata
+  imd = imi->GetImageMetadata();
+
 }
 
 template <class TOutputImage, class ConvertPixelTraits>

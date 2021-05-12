@@ -25,6 +25,9 @@
 #include "itkMetaDataObject.h"
 #include "otbImageKeywordlist.h"
 
+#include "itksys/SystemTools.hxx"
+#include "otbStringUtilities.h"
+
 namespace otb
 {
 
@@ -385,6 +388,7 @@ QuickBirdImageMetadataInterface::VariableLengthVectorType QuickBirdImageMetadata
 
 QuickBirdImageMetadataInterface::VariableLengthVectorType QuickBirdImageMetadataInterface::GetPhysicalGain() const
 {
+  // Reference : Radiance Conversion of QuickBird Data - Technical Note.
   const MetaDataDictionaryType& dict = this->GetMetaDataDictionary();
   if (!this->CanRead())
   {
@@ -415,8 +419,6 @@ QuickBirdImageMetadataInterface::VariableLengthVectorType QuickBirdImageMetadata
     }
   }
 
-  // Value computed from
-  // Radiance Conversion of QuickBird Data - Technical Note.
   std::string keywordStringBitsPerPixel = imageKeywordlist.GetMetadataByKey("support_data.bits_per_pixel");
   int         bitsPerPixel              = atoi(keywordStringBitsPerPixel.c_str());
   if (bitsPerPixel != 16 && bitsPerPixel != 8)

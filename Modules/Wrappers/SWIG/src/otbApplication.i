@@ -96,7 +96,9 @@ namespace Wrapper
     ParameterType_Group,
     ParameterType_ListView,
     ParameterType_RAM,
-    ParameterType_Bool
+    ParameterType_Bool,
+    ParameterType_Field,
+    ParameterType_Band
   } ParameterType;
 
   typedef enum
@@ -161,7 +163,7 @@ public:
   // TODO : finish wrapping
 };
 
-class OTB_GCP
+class GCP
 {
 public:
   std::string m_Id;
@@ -171,8 +173,7 @@ public:
   double m_GCPX;
   double m_GCPY;
   double m_GCPZ;
-  OTB_GCP();
-  ~OTB_GCP();
+  GCP();
   void Print(std::ostream& os) const;
 };
 
@@ -638,7 +639,9 @@ class ApplicationProxy(object):
         ParameterType_Float : 'ParameterType_Float',
         ParameterType_Choice : 'ParameterType_Choice',
         ParameterType_Group : 'ParameterType_Group',
-        ParameterType_Bool : 'ParameterType_Bool'
+        ParameterType_Bool : 'ParameterType_Bool',
+        ParameterType_Field : 'ParameterType_Field',
+        ParameterType_Band : 'ParameterType_Band'
       }.get(parameter_type, 'ParameterType_UNKNOWN')
 
     def __str__(self):
@@ -662,7 +665,7 @@ class ApplicationProxy(object):
         return self.SetParameterString(paramKey, value)
       elif paramType in [ParameterType_InputImageList, ParameterType_InputVectorDataList,
                          ParameterType_InputFilenameList, ParameterType_StringList,
-                         ParameterType_ListView]:
+                         ParameterType_ListView, ParameterType_Field, ParameterType_Band]:
         return self.SetParameterStringList(paramKey, value)
       elif paramType in [ParameterType_Int, ParameterType_Radius]:
         return self.SetParameterInt(paramKey, value)
@@ -698,7 +701,7 @@ class ApplicationProxy(object):
         return self.GetParameterString(paramKey)
       elif paramType in [ParameterType_InputImageList, ParameterType_InputVectorDataList,
                          ParameterType_InputFilenameList, ParameterType_StringList,
-                         ParameterType_ListView]:
+                         ParameterType_ListView, ParameterType_Field, ParameterType_Band]:
         return self.GetParameterStringList(paramKey)
       elif paramType in [ParameterType_Int, ParameterType_Radius, ParameterType_RAM]:
         return self.GetParameterInt(paramKey)
@@ -1023,11 +1026,11 @@ public:
     otb::Wrapper::MetaDataHelper::SetDouble(* $self,key,val);
     }
 
-  otb::OTB_GCP GetGCP(const std::string &key)
+  otb::GCP GetGCP(const std::string &key)
     {
     return otb::Wrapper::MetaDataHelper::GetGCP(* $self,key);
     }
-  void SetGCP(const std::string &key, const otb::OTB_GCP &val)
+  void SetGCP(const std::string &key, const otb::GCP &val)
     {
     otb::Wrapper::MetaDataHelper::SetGCP(* $self,key,val);
     }

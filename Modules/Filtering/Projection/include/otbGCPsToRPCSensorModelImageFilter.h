@@ -98,7 +98,6 @@ public:
 
   /** DEM typedef */
   typedef otb::DEMHandler                  DEMHandlerType;
-  typedef typename DEMHandlerType::Pointer DEMHandlerPointerType;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -125,10 +124,6 @@ public:
   itkSetMacro(MeanElevation, double);
   itkGetConstReferenceMacro(MeanElevation, double);
 
-  /** Set/Get the DEMHandler */
-  itkSetObjectMacro(DEMHandler, DEMHandlerType);
-  itkGetObjectMacro(DEMHandler, DEMHandlerType);
-
   /** Get the residual ground error */
   itkGetConstReferenceMacro(RMSGroundError, double);
 
@@ -144,9 +139,6 @@ public:
 
   /** Set the GCP container */
   void SetGCPsContainer(const GCPsContainerType& container);
-
-  /** Get Keywordlist */
-  itkGetConstReferenceMacro(Keywordlist, ImageKeywordlist);
 
   /** Add a GCP to the GCPContainer. This version of the AddGCP method
    * accepts a 3D ground point and does not use DEM or MeanElevation
@@ -207,14 +199,11 @@ private:
    * over the image is used instead */
   double m_MeanElevation;
 
-  /** The DEMHandler */
-  DEMHandlerPointerType m_DEMHandler;
-
   /** Container of GCPs */
   GCPsContainerType m_GCPsContainer;
 
-  /** Keywordlist */
-  ImageKeywordlist m_Keywordlist;
+  /** ImageMetadata */
+  ImageMetadata m_ImageMetadata;
 
   /** Flag to see if model is up-to-date */
   mutable bool m_ModelUpToDate;

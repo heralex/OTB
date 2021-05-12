@@ -68,6 +68,15 @@ set(OTBMetadata_SRC
   otbNoDataHelper.cxx
   otbFilterFunctionValues.cxx
   otbMetaDataKey.cxx
+
+  otbImageMetadata.cxx
+  otbGeometryMetadata.cxx
+  
+  otbGeomMetadataSupplier.cxx
+  otbXMLMetadataSupplier.cxx
+
+  otbMetadataStorageInterface.cxx
+  otbMetadataSupplierInterface.cxx
   )
 
 add_library(OTBMetadata ${OTBMetadata_SRC})
@@ -75,7 +84,8 @@ target_link_libraries(OTBMetadata
   ${OTBBoost_LIBRARIES}
   ${OTBCommon_LIBRARIES}
   ${OTBOSSIMAdapters_LIBRARIES}
-
+  ${Boost_LIBRARIES}
+  ${OTBGdalAdapters_LIBRARIES}
   )
 
 otb_module_target(OTBMetadata)

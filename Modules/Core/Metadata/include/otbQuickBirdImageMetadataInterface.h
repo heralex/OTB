@@ -138,9 +138,7 @@ public:
 
 protected:
   QuickBirdImageMetadataInterface();
-  ~QuickBirdImageMetadataInterface() override
-  {
-  }
+  ~QuickBirdImageMetadataInterface() override = default;
 
 private:
   QuickBirdImageMetadataInterface(const Self&) = delete;
